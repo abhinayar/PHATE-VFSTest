@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>PHATE Cloud Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      #main {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+
+      #output {
+        padding-top: 120px;
+      }
+
+      #btn2 {
+        margin-top: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main">
+      <div id="output">
+        Output:&nbsp;<span id="output-dyna"></span>
+      </div>
+      <br>
+      <br>
+      <div id="btns">
+        <button id="btn1" class="startButton" data-url="https://phate-cloud-test.herokuapp.com/test_python">Start Processing On Heroku</button>
+        <br>
+        <button id="btn2" class="startButton" data-url="http://localhost:3000/test_python">Start Processing On LocalHost</button>
+      </div>
+    </div>
+    <script
+      src="https://code.jquery.com/jquery-2.2.4.min.js"
+      integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+      crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+    <script>
+      $(function() {
+        $(".startButton").on('click', function() {
+          let url = $(this).data('url');
+
+          const socket = io(url);
+
+          socket.on('message', (message) => {
+            $('#output-dyna').text(message.toString());
+          })
+
+          socket.on('code', (code) => {
+            if (code === 200) {
+              socket.emit('start_processing');
+            }
+          })
+        })
+      })
+    </script>
+  </body>
+</html>
