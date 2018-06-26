@@ -19,8 +19,10 @@ $ npm i # or yarn if you fancy
 ## Usage
 
 1. Place the file you want to access in Python in the /spoof_uploads dir.
+1. Place the script you wan tot run in /scripts
+1. Edit the .safe_env file to reflect the python script name you are running
 1. Push to github (will auto-deploy heroku, give it a few seconds - 1min. to do this)
-1. Click "run script" on the FE UI (coming soon -> ability to test uploaded files from FE, but I didn't want to get into that yet... one thing at a tme)
+1. Click "Run on Heroku" or "Run on LocalHost" depending on environment (coming soon -> ability to test uploaded files from FE, but I didn't want to get into that yet... one thing at a tme)
 1. Watch for processing stream or error output
 1. Repeat/tweak code
 1. If code is cryptic check heroku error logs (if you have the Heroku CLI it's `heroku logs -n 2000` or whatever arbitrary number you choose.)

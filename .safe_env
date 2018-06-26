@@ -1,0 +1,2 @@
+SECRET='testSecret'
+PYTHON_SCRIPT_NAME='test_script.py'

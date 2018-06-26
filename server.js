@@ -8,7 +8,7 @@ const port = process.env.PORT || 3000,
   path = require('path');
 
 // Dotenv config
-require('dotenv').config()
+require('dotenv').config({ path: './.safe_env' })
 
 // Other env vars
 const dev = process.env.NODE_ENV !== 'production'
