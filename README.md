@@ -12,7 +12,7 @@ Currently built for testing on:
 
 ```bash
 $ git clone https://github.com/abhinayar/PHATE-VFSTest.git phate-vfstest
-$ cd phate-vftest # jump into the project
+$ cd phate-vfstest # jump into the project
 $ npm i # or yarn if you fancy
 ```
 
