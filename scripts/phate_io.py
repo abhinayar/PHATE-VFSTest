@@ -2,6 +2,7 @@ import scpreprocess
 import os
 import phate
 
+
 def run_phate(filename,
               # data loading params
               sparse=None,
