@@ -1,5 +1,7 @@
-import scprep
 import os
+os.system("pip install --user scprep phate")
+
+import scprep
 import phate
 
 
