@@ -1,4 +1,4 @@
-
+import os
 os.system("pip install --user scprep phate")
 
 import sys
