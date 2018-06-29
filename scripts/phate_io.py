@@ -1,6 +1,7 @@
+import sys
 import os
-os.system("pip install --user scprep phate")
-
+sys.path.insert(0, os.path.abspath('../PHATE/Python'))
+sys.path.insert(0, os.path.abspath('../scprep'))
 import scprep
 import phate
 

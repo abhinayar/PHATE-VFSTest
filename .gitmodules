@@ -1,0 +1,6 @@
+[submodule "PHATE"]
+	path = PHATE
+	url = https://github.com/KrishnaswamyLab/PHATE
+[submodule "scprep"]
+	path = scprep
+	url = https://github.com/KrishnaswamyLab/scprep
