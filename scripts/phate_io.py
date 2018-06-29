@@ -1,4 +1,4 @@
-import scpreprocess
+import scprep
 import os
 import phate
 
@@ -95,41 +95,41 @@ def run_phate(filename,
                  'sparse', 'gene_labels', 'allow_duplicates',
                  'metadata_channels']
     if filetype == 'zip':
-        load_fn = scpreprocess.io.load_10X_zip
+        load_fn = scprep.io.load_10X_zip
         load_kws = {'sparse': sparse,
                     'gene_labels': gene_labels,
                     'allow_duplicates': allow_duplicates}
     elif filetype == 'dir':
-        load_fn = scpreprocess.io.load_10X
+        load_fn = scprep.io.load_10X
         load_kws = {'sparse': sparse,
                     'gene_labels': gene_labels,
                     'allow_duplicates': allow_duplicates}
     elif filetype in ['hdf5', 'h5']:
-        load_fn = scpreprocess.io.load_10X_HDF5
+        load_fn = scprep.io.load_10X_HDF5
         load_kws = {'sparse': sparse,
                     'gene_labels': gene_labels,
                     'allow_duplicates': allow_duplicates,
                     'genome': genome}
     elif filetype == 'tsv':
-        load_fn = scpreprocess.io.load_tsv
+        load_fn = scprep.io.load_tsv
         load_kws = {'sparse': sparse,
                     'gene_names': gene_names,
                     'cell_names': cell_names,
                     'cell_axis': cell_axis}
     elif filetype == 'csv':
-        load_fn = scpreprocess.io.load_csv
+        load_fn = scprep.io.load_csv
         load_kws = {'sparse': sparse,
                     'gene_names': gene_names,
                     'cell_names': cell_names,
                     'cell_axis': cell_axis}
     elif filetype == 'mtx':
-        load_fn = scpreprocess.io.load_mtx
+        load_fn = scprep.io.load_mtx
         load_kws = {'sparse': sparse,
                     'gene_names': gene_names,
                     'cell_names': cell_names,
                     'cell_axis': cell_axis}
     elif filetype == 'fcs':
-        load_fn = scpreprocess.io.load_fcs
+        load_fn = scprep.io.load_fcs
         load_kws = {'sparse': sparse,
                     'gene_names': gene_names,
                     'cell_names': cell_names,
@@ -152,13 +152,13 @@ def run_phate(filename,
 
     transform_args = ['pseudocount', 'cofactor']
     if transform == 'sqrt':
-        transform_fn = scpreprocess.transform.sqrt_transform
+        transform_fn = scprep.transform.sqrt_transform
         transform_kws = {}
     elif transform == 'log':
-        transform_fn = scpreprocess.transform.log_transform
+        transform_fn = scprep.transform.log_transform
         transform_kws = {'cofactor': cofactor}
     elif transform == 'arcsinh':
-        transform_fn = scpreprocess.transform.arcsinh_transform
+        transform_fn = scprep.transform.arcsinh_transform
         transform_kws = {'pseudocount': pseudocount}
     elif transform is None:
         transform_kws = {}
@@ -178,13 +178,13 @@ def run_phate(filename,
 
     data = load_fn(filename, **load_kws)
     if min_library_size is not None:
-        data = scpreprocess.filter.filter_library_size(data,
-                                                       cutoff=min_library_size)
+        data = scprep.filter.filter_library_size(data,
+                                                 cutoff=min_library_size)
     if min_cells_per_gene is not None:
-        data = scpreprocess.filter.remove_rare_genes(data,
-                                                     cutoff=min_cells_per_gene)
+        data = scprep.filter.remove_rare_genes(data,
+                                               cutoff=min_cells_per_gene)
     if library_size_normalize:
-        data = scpreprocess.normalize.library_size_normalize(data)
+        data = scprep.normalize.library_size_normalize(data)
     if transform is not None:
         data = transform_fn(data, **transform_kws)
 
