@@ -57,9 +57,7 @@ io.of('/test_python').on('connection', (socket) => {
     let errorFlag = false;
 
     const spawn_install = require('child_process').spawn,
-      pyInstallProcess = spawn_install("pip", ["install", "-r", "./requirements.txt"]),
-      output = pyInstallProcess.stdout,
-      error = pyInstallProcess.stderr;
+      pyInstallProcess = spawn_install("pip", ["install", "-r", "./requirements.txt"])
 
     pyInstallProcess.stdout.on('data', (data) => {
       console.log(`child stdout:\n${data}`);
