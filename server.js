@@ -57,9 +57,13 @@ io.of('/test_python').on('connection', (socket) => {
     let errorFlag = false;
 
     const spawn_install = require('child_process').spawn,
-      pyInstallProcess = spawn_install("pip", ["install", "-r", "requirements.txt"]),
+      pyInstallProcess = spawn_install("pip", ["install", "-r", "./requirements.txt"]),
       output = pyInstallProcess.stdout,
       error = pyInstallProcess.stderr;
+
+    pyInstallProcess.stdout.on('data', (data) => {
+      console.log(`child stdout:\n${data}`);
+    });
 
     console.log("Processing has been started");
     console.log("Beginning PHATE processing");
