@@ -60,23 +60,23 @@ var spawnSync = _require.spawnSync;
 // dependencies have been installed. For more info:
 // https://medium.freecodecamp.org/node-js-child-processes-everything-you-need-to-know-e69498fe970a
 
-pyInstallProcess = spawnSync('pip install -r requirements.txt', {
+pyInstallProcess = spawn('pip install -r requirements.txt', {
   shell: true
 });
 
-// pyInstallProcess.stdout.on('data', (data) => {
-//   console.log(`PIP Install Out:\n${data}`);
-// });
-//
-// pyInstallProcess.stderr.on('data', (data) => {
-//   console.log(`PIP Install Error:\n${data}`);
-// });
+pyInstallProcess.stdout.on('data', (data) => {
+  console.log(`PIP Install Out:\n${data}`);
+});
 
-// pyInstallProcess.on('exit', (code, signal) => {
-//   console.log(`PIP install process exited with ${ code } ${ signal }`);
-// });
+pyInstallProcess.stderr.on('data', (data) => {
+  console.log(`PIP Install Error:\n${data}`);
+});
 
-console.log(pyInstallProcess.output);
+pyInstallProcess.on('exit', (code, signal) => {
+  console.log(`PIP install process exited with ${ code } ${ signal }`);
+});
+
+//console.log(pyInstallProcess.output);
 
 // Setup routing
 io.of('/test_python').on('connection', function (socket) {
