@@ -47,7 +47,32 @@ app.use((req, res, next) => {
 // Setup Socket.io for Py message streaming
 const io = require('socket.io').listen(server);
 
-//Setup routing
+// Install PIP dependencies from the requirements.txt root file
+const { spawn, spawnSync } = require('child_process');
+
+// Use the synchronous version of the Spawn function
+// This ensures that the rest of the event loop does not execute till our
+// dependencies have been installed. For more info:
+// https://medium.freecodecamp.org/node-js-child-processes-everything-you-need-to-know-e69498fe970a
+pyInstallProcess = spawnSync(`pip install -r requirements.txt`, {
+  shell: true
+});
+
+// pyInstallProcess.stdout.on('data', (data) => {
+//   console.log(`PIP Install Out:\n${data}`);
+// });
+//
+// pyInstallProcess.stderr.on('data', (data) => {
+//   console.log(`PIP Install Error:\n${data}`);
+// });
+
+// pyInstallProcess.on('exit', (code, signal) => {
+//   console.log(`PIP install process exited with ${ code } ${ signal }`);
+// });
+
+console.log(pyInstallProcess.output)
+
+// Setup routing
 io.of('/test_python').on('connection', (socket) => {
   console.log("User connected to WebSocket");
   socket.emit("message", "Establishing Socket Handshake");
@@ -56,19 +81,13 @@ io.of('/test_python').on('connection', (socket) => {
   socket.on("start_processing", (payload) => {
     let errorFlag = false;
 
-    socket.emit("message", "Installing python deps");
-    const spawn = require('child_process').spawn,
-      pyInstallProcess = spawn("pip", ["install", "-r", "./requirements.txt"])
-
-    pyInstallProcess.stdout.on('data', (data) => {
-      console.log(`child stdout:\n${data}`);
-      socket.emit("message", "${data}");
-    });
-
     console.log("Processing has been started");
     console.log("Beginning PHATE processing");
 
-    const pyProcess = spawn("python", ["./scripts/" + process.env.PYTHON_SCRIPT_NAME]),
+    const pyProcess = spawn(`python ../scripts/${ process.env.PYTHON_SCRIPT_NAME }`, {
+        shell: true,
+        cwd: './spoof_uploads'
+      }),
       output = pyProcess.stdout,
       error = pyProcess.stderr;
 
