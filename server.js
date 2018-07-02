@@ -48,7 +48,8 @@ app.use((req, res, next) => {
 const io = require('socket.io').listen(server);
 
 // Install PIP dependencies from the requirements.txt root file
-const { spawn, spawnSync } = require('child_process');
+const spawn = require('child_process').spawn,
+  spawnSync = require('child_process').spawnSync;
 
 // Use the synchronous version of the Spawn function
 // This ensures that the rest of the event loop does not execute till our
