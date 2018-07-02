@@ -54,7 +54,7 @@ const { spawn, spawnSync } = require('child_process');
 // This ensures that the rest of the event loop does not execute till our
 // dependencies have been installed. For more info:
 // https://medium.freecodecamp.org/node-js-child-processes-everything-you-need-to-know-e69498fe970a
-pyInstallProcess = spawn(`pip install -r requirements.txt`, {
+pyInstallProcess = spawn(`pip install --user -r requirements.txt`, {
   shell: true
 });
 
