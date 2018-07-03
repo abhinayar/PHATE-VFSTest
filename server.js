@@ -54,7 +54,7 @@ const { spawn, spawnSync } = require('child_process');
 // This ensures that the rest of the event loop does not execute till our
 // dependencies have been installed. For more info:
 // https://medium.freecodecamp.org/node-js-child-processes-everything-you-need-to-know-e69498fe970a
-pyInstallProcess = spawn(`pip install --user -r requirements.txt`, {
+pyInstallProcess = spawn(`pip3 install --user -r requirements.txt`, {
   shell: true
 });
 
@@ -84,7 +84,7 @@ io.of('/test_python').on('connection', (socket) => {
     console.log("Processing has been started");
     console.log("Beginning PHATE processing");
 
-    const pyProcess = spawn(`python ../scripts/${ process.env.PYTHON_SCRIPT_NAME }`, {
+    const pyProcess = spawn(`python3 ../scripts/${ process.env.PYTHON_SCRIPT_NAME }`, {
         shell: true,
         cwd: './spoof_uploads'
       }),
