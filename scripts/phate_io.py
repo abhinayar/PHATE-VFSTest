@@ -155,13 +155,13 @@ def run_phate(filename,
 
     transform_args = ['pseudocount', 'cofactor']
     if transform == 'sqrt':
-        transform_fn = scprep.transform.sqrt_transform
+        transform_fn = scprep.transform.sqrt
         transform_kws = {}
     elif transform == 'log':
-        transform_fn = scprep.transform.log_transform
+        transform_fn = scprep.transform.log
         transform_kws = {'cofactor': cofactor}
     elif transform == 'arcsinh':
-        transform_fn = scprep.transform.arcsinh_transform
+        transform_fn = scprep.transform.arcsinh
         transform_kws = {'pseudocount': pseudocount}
     elif transform is None:
         transform_kws = {}
