@@ -180,7 +180,7 @@ def run_phate(filename,
                     arg, transform, eval(arg))
 
     data = load_fn(filename, **load_kws)
-    data = scprep.sanitize.check_numeric(data)
+    data = scprep.sanitize.check_numeric(data, copy=True)
     if min_library_size is not None:
         data = scprep.filter.filter_library_size(data,
                                                  cutoff=min_library_size)
