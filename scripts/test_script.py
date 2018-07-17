@@ -1,19 +1,38 @@
 import sys
-from phate_io import run_phate, extract_gene_data
+import phate_io
 
-run_phate("test_10X.zip",
-          sparse=None,
-          gene_labels='symbol',
-          allow_duplicates=False,
-          min_library_size=10,
-          min_cells_per_gene=2,
-          operator_filename="operator.pickle",
-          pca_filename="pca.pickle",
-          coords_filename="phate.mat")
+phate_io.run_phate_from_file(
+    "test_10X.zip",
+    sparse=True,
+    gene_names=True,
+    cell_names=True,
+    cell_axis='row',
+    min_library_size=10,
+    min_cells_per_gene=2,
+    operator_filename="operator.pickle",
+    pca_filename="pca.pickle",
+    coords_filename="phate.mat")
 
-extract_gene_data(gene_id=15,
-                  pca_filename="pca.pickle",
-                  color_filename="color.mat")
+phate_io.extract_gene_data(
+    gene_id=15,
+    pca_filename="pca.pickle",
+    color_filename="color.mat")
+
+# change an easy to change parameter
+phate_io.run_phate_from_preloaded(
+    operator_filename="operator.pickle",
+    pca_filename="pca.pickle",
+    coords_filename="phate.mat",
+    t=12
+)
+
+# change a hard-to-change parameter
+phate_io.run_phate_from_preloaded(
+    operator_filename="operator.pickle",
+    pca_filename="pca.pickle",
+    coords_filename="phate.mat",
+    k=4, a=100
+)
 
 sys.stdout.write("OUT DATA TEST SUCCESSFUL")
 

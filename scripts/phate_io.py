@@ -1,6 +1,5 @@
 import matplotlib
 matplotlib.use("Agg")
-import sys
 import os
 import scprep
 import phate
@@ -11,32 +10,80 @@ import scipy.sparse
 from sklearn import decomposition
 
 
-def run_phate(filename,
-              # data loading params
-              sparse=True,
-              gene_names=None,
-              cell_names=None,
-              cell_axis=None,
-              delimiter=None,
-              gene_labels=None,
-              allow_duplicates=None,
-              genome=None,
-              metadata_channels=None,
-              # filtering params
-              min_library_size=2000,
-              min_cells_per_gene=10,
-              # normalization params
-              library_size_normalize=True,
-              transform='sqrt',
-              pseudocount=None,
-              cofactor=None,
-              # saving params
-              store_n_pca=20,
-              store_dtype=np.float16,
-              operator_filename="operator.pickle",
-              pca_filename="pca.pickle",
-              coords_filename="phate.mat",
-              **phate_kws):
+def _run_phate(phate_op,
+               data,
+               store_n_pca=20,
+               store_dtype=np.float16,
+               operator_filename="operator.pickle",
+               pca_filename="pca.pickle",
+               coords_filename="phate.mat"):
+    phate_data = phate_op.fit_transform(data)
+
+    # save phate operator
+    del phate_op.X
+    del phate_op.graph.data
+    with open(operator_filename, 'wb') as handle:
+        pickle.dump(phate_op, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    # save pca of raw data
+    pca = dict()
+    try:
+        pca['loadings'] = phate_op.graph.data_nu[
+            :, :store_n_pca].astype(store_dtype)
+        pca['components'] = phate_op.graph.data_pca.components_[
+            :store_n_pca, :].astype(store_dtype)
+        if not scipy.sparse.issparse(data):
+            pca['mean'] = phate_op.graph.data_pca.mean_.astype(store_dtype)
+    except AttributeError:
+        # no pca performed
+        if data.shape[1] > store_n_pca:
+            if scipy.sparse.issparse(data):
+                pca_op = decomposition.TruncatedSVD(store_n_pca)
+            else:
+                pca_op = decomposition.PCA(store_n_pca)
+            pca['loadings'] = pca_op.fit_transform(data).astype(store_dtype)
+            pca['components'] = pca_op.components_.astype(store_dtype)
+            if scipy.sparse.issparse(data):
+                pca['mean'] = pca_op.mean_.astype(store_dtype)
+        else:
+            pca['loadings'] = data.astype(store_dtype)
+    with open(pca_filename, 'wb') as handle:
+        pickle.dump(pca, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    # save phate coords
+    scipy.io.savemat(coords_filename, {
+                     'phate': phate_data.astype(store_dtype)})
+
+    return coords_filename, pca_filename, operator_filename
+
+
+def run_phate_from_file(
+        filename,
+        # data loading params
+        sparse=True,
+        gene_names=None,
+        cell_names=None,
+        cell_axis=None,
+        delimiter=None,
+        gene_labels=None,
+        allow_duplicates=None,
+        genome=None,
+        metadata_channels=None,
+        # filtering params
+        min_library_size=2000,
+        min_cells_per_gene=10,
+        # normalization params
+        library_size_normalize=True,
+        transform='sqrt',
+        pseudocount=None,
+        cofactor=None,
+        # saving params
+        store_n_pca=20,
+        store_dtype=np.float16,
+        operator_filename="operator.pickle",
+        pca_filename="pca.pickle",
+        coords_filename="phate.mat",
+        **phate_kws):
     """Run PHATE on a file
 
     Parameters
@@ -102,6 +149,8 @@ def run_phate(filename,
         filetype = 'dir'
     elif os.path.isfile(filename):
         filetype = filename.split('.')[-1]
+        if filetype == 'gz':
+            filetype = ".".join(filename.split('.')[-2:])
     else:
         raise RuntimeError("file {} not found".format(filename))
 
@@ -124,13 +173,13 @@ def run_phate(filename,
                     'gene_labels': gene_labels,
                     'allow_duplicates': allow_duplicates,
                     'genome': genome}
-    elif filetype == 'tsv':
+    elif filetype in ['tsv', 'tsv.gz']:
         load_fn = scprep.io.load_tsv
         load_kws = {'sparse': sparse,
                     'gene_names': gene_names,
                     'cell_names': cell_names,
                     'cell_axis': cell_axis}
-    elif filetype == 'csv':
+    elif filetype in ['csv', 'csv.gz']:
         load_fn = scprep.io.load_csv
         load_kws = {'sparse': sparse,
                     'gene_names': gene_names,
@@ -150,7 +199,8 @@ def run_phate(filename,
                     'metadata_channels': metadata_channels}
     else:
         raise RuntimeError("filetype {} not recognized. Expected 'csv', "
-                           "'tsv', 'mtx', 'zip', 'hdf5', 'h5', 'fcs' or a "
+                           "'tsv', 'csv.gz', 'tsv.gz', 'mtx', 'zip', 'hdf5', "
+                           "'h5', 'fcs' or a "
                            "directory".format(filetype))
     for arg in load_args:
         if arg == 'sparse':
@@ -204,43 +254,34 @@ def run_phate(filename,
         data = transform_fn(data, **transform_kws)
 
     phate_op = phate.PHATE(**phate_kws)
+    return _run_phate(phate_op, data,
+                      store_n_pca=store_n_pca,
+                      store_dtype=store_dtype,
+                      operator_filename=operator_filename,
+                      pca_filename=pca_filename,
+                      coords_filename=coords_filename)
 
-    phate_data = phate_op.fit_transform(data)
 
-    # save phate operator
-    with open(operator_filename, 'wb') as handle:
-        pickle.dump(phate_op, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    # save pca of raw data
-    pca = dict()
-    try:
-        pca['loadings'] = phate_op.graph.data_nu[
-            :, :store_n_pca].astype(store_dtype)
-        pca['components'] = phate_op.graph.data_pca.components_[
-            :store_n_pca, :].astype(store_dtype)
-        if not scipy.sparse.issparse(data):
-            pca['mean'] = phate_op.graph.data_pca.mean_.astype(store_dtype)
-    except AttributeError:
-        # no pca performed
-        if data.shape[1] > store_n_pca:
-            if scipy.sparse.issparse(data):
-                pca_op = decomposition.TruncatedSVD(store_n_pca)
-            else:
-                pca_op = decomposition.PCA(store_n_pca)
-            pca['loadings'] = pca_op.fit_transform(data).astype(store_dtype)
-            pca['components'] = pca_op.components_.astype(store_dtype)
-            if scipy.sparse.issparse(data):
-                pca['mean'] = pca_op.mean_.astype(store_dtype)
-        else:
-            pca['loadings'] = data.astype(store_dtype)
-    with open(pca_filename, 'wb') as handle:
-        pickle.dump(pca, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    # save phate coords
-    scipy.io.savemat(coords_filename, {
-                     'phate': phate_data.astype(store_dtype)})
-
-    return coords_filename, pca_filename, operator_filename
+def run_phate_from_preloaded(
+        operator_filename="operator.pickle",
+        store_n_pca=20,
+        store_dtype=np.float16,
+        pca_filename="pca.pickle",
+        coords_filename="phate.mat",
+        **phate_kws):
+    # load the operator
+    with open(operator_filename, 'rb') as handle:
+        phate_op = pickle.load(handle)
+    # fix missing `data` component
+    phate_op.X = phate_op.graph.data = phate_op.graph.data_nu
+    # update parameters
+    phate_op.set_params(**phate_kws)
+    return _run_phate(phate_op, phate_op.X,
+                      store_n_pca=store_n_pca,
+                      store_dtype=store_dtype,
+                      operator_filename=operator_filename,
+                      pca_filename=pca_filename,
+                      coords_filename=coords_filename)
 
 
 def extract_gene_data(gene_id,
